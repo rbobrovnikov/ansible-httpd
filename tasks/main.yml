@@ -1,0 +1,13 @@
+---
+
+- name: Install HTTP
+  yum: name={{ item }} state=present
+  with_items:
+   - httpd
+  notify:
+   - apache start
+
+#- name: Copy phpinfo to server
+#  template:
+#   src: templates/index.php.j2
+#   dest: /var/www/html/index.php

@@ -1,0 +1,12 @@
+---
+
+- name: apache start 
+  service: 
+   name: httpd
+   state: started
+   enabled: "yes"
+
+- name: apache restart   
+  service:
+   name: httpd
+   state: restarted
