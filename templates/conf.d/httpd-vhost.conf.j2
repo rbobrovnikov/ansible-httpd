@@ -1,0 +1,11 @@
+<VirtualHost {{ item }}:{{ httpd_conf['port_http'] }}>
+        ServerName {{ item }}
+{% for vha in vhosts['alias'] %}
+        ServerAlias {{ vha }}.{{ item }}
+{% endfor %}
+	DocumentRoot "{{ httpd_conf['doc_root'] }}/{{ item }}"
+        ServerAdmin {{ vhosts['srv_admin'] }}
+	ErrorLog {{ vhosts['error_log_path'] }}{{ item }}_error.log 
+	CustomLog {{ vhosts['custom_log_path'] }}{{ item }}_access.log \
+                "%t %h \"%r\" %b"
+</VirtualHost>

@@ -1,0 +1,24 @@
+---
+
+none_ssl_vhosts: 'yes'
+ssl_vhosts: 'yes'
+
+httpd_conf_dir: "/etc/httpd/conf"
+
+httpd_conf:
+ pkg_name: httpd
+ pkg_state: latest
+ srv_state: started 
+
+ listen_ip: 91.241.80.36
+ port_http: 80
+ port_https: 443
+ srv_root: "/etc/httpd"
+ srv_user: apache
+ srv_group: apache 
+ srv_admin: root@localhost
+ srv_name: 91.241.80.36 
+ doc_root: "/var/www/html"
+ dir_index: |
+   DirectoryIndex index.html index.php
+ log_level: warn

@@ -1,11 +1,71 @@
 ---
 
-- name: Install HTTP
-  yum: name={{ item }} state=present
+
+- name: Install HTTPD, mod_ssl
+  yum:
+   name: "{{ item }}"
+   state: present
   with_items:
    - httpd
+   - mod_ssl
   notify:
-   - apache start
+   - httpd start
+
+- name: Copy httpd.conf
+  template:
+   src: httpd/templates/httpd.conf.j2
+   dest: "{{ httpd_conf_dir }}/httpd.conf"
+
+- name: Create sites.d directory
+  file:
+   path: "/etc/httpd/conf.d/sites.d"
+   state: directory
+   owner: root
+   group: root
+   mode: 0755
+
+- name: Include sites.d to httpd.conf
+  lineinfile:
+   dest: "{{ httpd_conf_dir }}/httpd.conf"
+   state: present
+   line: 'IncludeOptional conf.d/sites.d/*.conf'
+  notify:
+   - httpd restart
+
+- name: Create a none-SSL VirtualHost file
+  template:
+   src: httpd/templates/conf.d/httpd-vhost.conf.j2
+   dest: /etc/httpd/conf.d/sites.d/{{ item }}.conf
+   owner: root
+   group: root
+   mode: 0644
+  with_items: "{{ vhost_list_no_ssl }}"
+  when: none_ssl_vhosts == 'yes'
+  notify:
+   - httpd restart
+
+- name: Create a SSL VirtualHost file
+  template:
+   src: httpd/templates/conf.d/ssl-vhost.conf.j2
+   dest: /etc/httpd/conf.d/sites.d/ssl-{{ item }}.conf
+   owner: root
+   group: root
+   mode: 0644
+  with_items: "{{ vhost_list_ssl }}"
+  when: ssl_vhosts == 'yes'
+  notify:
+   - httpd restart
+
+- name: Create web dir for VirtualHosts
+  file:
+   path: "{{ httpd_conf.doc_root }}/{{ item }}"
+   state: directory
+   owner: "{{ httpd_conf.srv_user }}" 
+   group: "{{ httpd_conf.srv_group }}" 
+   mode: 0755
+  with_items: 
+   - "{{ vhost_list_no_ssl }}"
+   - "{{ vhost_list_ssl }}"
 
 #- name: Copy phpinfo to server
 #  template:

@@ -1,0 +1,37 @@
+---
+
+vhost_list_no_ssl:
+ - v1.domain.com
+ - v2.domain.com
+
+vhost_list_ssl:
+ - v3.domain.com
+ - v7.example.com
+
+vhosts:
+   vname: "{{ item }}" 
+   alias:
+    - www
+    - www2
+   srv_admin: webmaster@domain.com
+   custom_log_path: logs/ 
+   error_log_path: logs/
+   loglevel: warn 
+
+
+vhosts_ssl:
+   vname: "{{ item }}" 
+   alias:
+    - sec 
+    - sec2
+   srv_admin: webmaster@domain.com
+   transfer_log_path: logs/
+   custom_log_path: logs/
+   error_log_path: logs/
+   loglevel: warn
+   engine: 'On'
+   protocol: "all -SSLv2"
+   cipher: "HIGH:MEDIUM:!aNULL:!MD5:!SEED:!IDEA"
+   certfile: "/etc/letsencrypt/live/{{ item }}/cert.pem"
+   certkey: "/etc/letsencrypt/live/{{ item }}/privkey.pem"
+   certchain: "/etc/letsencrypt/live/{{ item }}/chain.pem"

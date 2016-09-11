@@ -1,0 +1,43 @@
+#Listen {{ httpd_conf['port_https'] }} https
+
+SSLPassPhraseDialog exec:/usr/libexec/httpd-ssl-pass-dialog
+
+SSLSessionCache         shmcb:/run/httpd/sslcache(512000)
+SSLSessionCacheTimeout  300
+
+SSLRandomSeed startup file:/dev/urandom  256
+SSLRandomSeed connect builtin
+
+SSLCryptoDevice builtin
+
+<VirtualHost {{ item }}:{{ httpd_conf['port_https'] }}>
+
+	DocumentRoot "{{ httpd_conf['doc_root'] }}/{{ item }}" 
+	ServerName {{ item }}:{{ httpd_conf['port_https'] }}
+        {% for ssl_vha in vhosts_ssl['alias'] %}
+        ServerAlias {{ ssl_vha }}.{{ item }}
+        {% endfor %} 
+	ServerAdmin {{ vhosts_ssl['srv_admin'] }}
+	ErrorLog {{ vhosts_ssl['error_log_path'] }}{{ item }}_ssl_error.log 
+	TransferLog {{ vhosts_ssl['transfer_log_path'] }}{{ item }}_ssl_access.log
+	CustomLog {{ vhosts_ssl['custom_log_path'] }}_ssl_request_log \
+                "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b" 
+	LogLevel {{ vhosts_ssl['loglevel'] }} 
+
+	SSLEngine {{ vhosts_ssl['engine'] }} 
+	SSLProtocol {{ vhosts_ssl['protocol'] }} 
+	SSLCipherSuite {{ vhosts_ssl['cipher'] }} 
+#	SSLCertificateFile {{ vhosts_ssl['certfile'] }} 
+#	SSLCertificateKeyFile {{ vhosts_ssl['certkey'] }}
+#	SSLCertificateChainFile {{ vhosts_ssl['certchain'] }} 
+
+        <Files ~ "\.(cgi|shtml|phtml|php3?)$">
+            SSLOptions +StdEnvVars
+        </Files>
+
+        BrowserMatch "MSIE [2-5]" \
+            nokeepalive ssl-unclean-shutdown \
+            downgrade-1.0 force-response-1.0
+
+
+</VirtualHost>                                  
